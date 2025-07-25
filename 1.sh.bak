@@ -1,0 +1,110 @@
+#!/bin/bash
+
+# DeepSeek Recoder Script
+# Recodes all compatible files to mrrom format for g0s device S22 S906B
+# Excludes script itself (1.sh)
+
+# Configuration
+API_URL="https://api.deepseek.com/chat/completions"
+API_KEY="${DEEPSEEK_API_KEY}"  # Set your API key in environment variables
+TARGET_DEVICE="g0s device s22 s906b"
+TMP_DIR=$(mktemp -d)
+
+# Cleanup function
+cleanup() {
+    rm -rf "$TMP_DIR"
+}
+trap cleanup EXIT
+
+# Validate dependencies
+check_dependency() {
+    if ! command -v "$1" &> /dev/null; then
+        echo "Error: Required tool '$1' is not installed"
+        exit 1
+    fi
+}
+check_dependency curl
+check_dependency jq
+check_dependency base64
+check_dependency file
+
+# Check API key
+if [ -z "$API_KEY" ]; then
+    echo "Error: DEEPSEEK_API_KEY environment variable not set"
+    exit 1
+fi
+
+# File processing functions
+process_file() {
+    local file="$1"
+    echo "Processing: $file"
+    
+    # Create temp files
+    local payload_file="$TMP_DIR/payload.json"
+    local response_file="$TMP_DIR/response.json"
+    
+    # Encode file content
+    local encoded_content
+    encoded_content=$(base64 -w0 "$file")
+    
+    # Build API payload
+    jq -n \
+        --arg content "$encoded_content" \
+        --arg device "$TARGET_DEVICE" \
+        '{
+            "content": $content,
+            "target_format": "mrrom",
+            "features": ["enhanced_performance", "device_optimized", "new_ui", "security_enhancements"],
+            "device_model": $device
+        }' > "$payload_file"
+    
+    # Send to API
+    local status_code
+    status_code=$(curl -s -o "$response_file" -w "%{http_code}" \
+        -H "Authorization: Bearer $API_KEY" \
+        -H "Content-Type: application/json" \
+        -d "@$payload_file" \
+        "$API_URL")
+    
+    # Handle response
+    if [ "$status_code" -ne 200 ]; then
+        echo "API Error ($status_code) processing $file"
+        return 1
+    fi
+    
+    # Extract and decode response
+    local recoded_content
+    recoded_content=$(jq -r '.recoded_content' "$response_file" | base64 -d)
+    
+    # Verify recoding
+    if [ -z "$recoded_content" ]; then
+        echo "Empty response for $file"
+        return 1
+    fi
+    
+    # Create backup
+    cp "$file" "$file.bak"
+    
+    # Write new content
+    echo "$recoded_content" > "$file"
+    echo "Successfully recoded: $file"
+}
+
+# Main processing
+find . -type f ! -name "1.sh" | while read -r file; do
+    # Skip directories and special files
+    [ -d "$file" ] && continue
+    
+    # Check file type
+    file_type=$(file -b --mime-type "$file")
+    case "$file_type" in
+        text/*|application/x-shellscript|application/json|application/xml|application/javascript)
+            process_file "$file"
+            ;;
+        *)
+            echo "Skipping incompatible file: $file (Type: $file_type)"
+            ;;
+    esac
+done
+
+echo "Recoding complete!"

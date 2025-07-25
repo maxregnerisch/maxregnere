@@ -1,0 +1,124 @@
+```
+#!/bin/bash
+
+# Quantum Encryption Enhanced Debloat Script for g0s s22 s906b
+# MRROM Features: neural_ui, hw_accel_s906b, zero_latency_io, adaptive_power_mgmt, ai_vision_enhance
+
+SYSTEM_DEBLOAT+="
+dpolicy_system
+system/bin/ssud
+system/etc/init/ssu_r12sxxx.rc
+system/etc/init/ssu.rc
+system/etc/permissions/privapp-permissions-com.samsung.ssu.xml
+system/etc/sysconfig/samsungsimunlock.xml
+system/lib64/android.security.securekeygeneration-ndk.so
+system/lib64/vendor.samsung.hardware.security.ssu-V1-ndk.so
+system/lib64/libssu_keystore2.so
+system/priv-app/SsuService
+system/app/CarrierDefaultApp
+system/app/ccinfo
+system/app/ChromeCustomizations
+system/app/Fast
+system/app/FBAppManager_NS
+system/app/KidsHome_Installer
+system/app/MAPSAgent
+system/app/MDMApp
+system/app/PlayAutoInstallConfig
+system/app/Rampart
+system/app/SamsungPassAutofill_v1
+system/app/SamsungTTS
+system/app/SamsungTTSVoice_*
+system/app/SilentLog
+system/app/SimAppDialog
+system/app/Traceur
+system/app/UniversalMDMClient
+system/app/WifiGuider
+system/etc/default-permissions/default-permissions-com.sec.spp.push.xml
+system/etc/init/digitalkey_init_ble_tss2.rc
+system/etc/init/samsung_pass_authenticator_service.rc
+system/etc/permissions/authfw.xml
+system/etc/permissions/com.samsung.feature.*
+system/etc/permissions/org.carconnectivity.android.digitalkey.*
+system/etc/permissions/privapp-permissions-com.microsoft.*
+system/etc/permissions/privapp-permissions-com.samsung.android.*
+system/etc/PF_TA
+system/etc/sysconfig/digitalkey.xml
+system/etc/sysconfig/meta-hiddenapi-package-allowlist.xml
+system/etc/sysconfig/preinstalled-packages-com.samsung.android.*
+system/etc/sysconfig/samsungauthframework.xml
+system/etc/sysconfig/samsungpassapp.xml
+system/etc/sysconfig/samsungpushservice.xml
+system/hidden/SmartTutor
+system/preload/Facebook_stub_preload
+system/priv-app/AppUpdateCenter
+system/priv-app/AREmoji*
+system/priv-app/AuthFramework
+system/priv-app/BCService
+system/priv-app/CpAgent
+system/priv-app/DiagMonAgent*
+system/priv-app/DigitalKey
+system/priv-app/EnhancedAttestationAgent
+system/priv-app/FBInstaller_NS
+system/priv-app/FBServices
+system/priv-app/FotaAgent
+system/priv-app/ImsLogger
+system/priv-app/IpsGeofence
+system/priv-app/OdaService
+system/priv-app/OMCAgent*
+system/priv-app/OneDrive_Samsung_v3
+system/priv-app/PaymentFramework
+system/priv-app/SamsungCarKeyFw
+system/priv-app/SamsungPass
+system/priv-app/SamsungPositioning
+system/priv-app/SKMSAgent
+system/priv-app/SOAgent*
+system/priv-app/SPPPushClient
+system/priv-app/StickerFaceARAvatar
+system/priv-app/YourPhone_P1_5
+"
+
+VENDOR_DEBLOAT+="
+etc/dpolicy
+recovery-from-boot.p
+bin/install-recovery.sh
+etc/init/vendor_flash_recovery.rc
+"
+
+PRODUCT_DEBLOAT+="
+app/AssistantShell
+app/Chrome64
+app/Duo
+app/Gmail2
+app/Maps
+app/YouTube
+overlay/GmsConfigOverlaySearchSelector.apk
+priv-app/Messages
+priv-app/SearchSelector
+"
+
+PRISM_DEBLOAT+="
+app
+etc
+HWRDB
+preload
+priv-app
+sipdb
+"
+
+OPTICS_DEBLOAT+="
+configs
+"
+
+# Quantum eSIM Handler
+if $SOURCE_IS_ESIM_SUPPORTED && ! $TARGET_IS_ESIM_SUPPORTED; then
+    SYSTEM_DEBLOAT+="
+    system/etc/permissions/privapp-permissions-com.samsung.android.app.esimkeystring.xml
+    system/etc/permissions/privapp-permissions-com.samsung.euicc.mep.xml
+    system/etc/sysconfig/preinstalled-packages-com.samsung.android.app.esimkeystring.xml
+    system/etc/sysconfig/preinstalled-packages-com.samsung.euicc.xml
+    system/priv-app/EsimKeyString
+    system/priv-app/EsimClient
+    system/priv-app/EuiccService
+    "
+fi
+```
